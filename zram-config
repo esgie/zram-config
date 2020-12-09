@@ -108,6 +108,9 @@ createZdir() {
 }
 
 createZlog() {
+	if dpkg -s 'nginx' &> /dev/null && [[ $(systemctl is-active nginx.service) == "active" ]]; then
+		systemctl stop nginx.service >> "$ZLOG" 2>&1 || return 1
+	fi
 	if [[ $(systemctl is-active rsyslog.service) == "active" ]]; then
 		systemctl stop rsyslog.service >> "$ZLOG" 2>&1 || return 1
 	fi
@@ -115,6 +118,9 @@ createZlog() {
 	createZdir
 
 	systemctl restart rsyslog.service >> "$ZLOG" 2>&1 || return 1
+	if dpkg -s 'nginx' &> /dev/null; then
+		systemctl restart nginx.service >> "$ZLOG" 2>&1 || return 1
+	fi
 
 	journalctl --flush >> "$ZLOG" 2>&1 || return 1
 
@@ -142,6 +148,9 @@ removeZlog() {
 	echo "$ZRAM_DEV" >> "$ZLOG"
 
 	if [[ -n $TARGET_DIR ]]; then
+		if dpkg -s 'nginx' &> /dev/null && [[ $(systemctl is-active nginx.service) == "active" ]]; then
+			systemctl stop nginx.service >> "$ZLOG" 2>&1 || return 1
+		fi
 		if [[ $(systemctl is-active rsyslog.service) == "active" ]]; then
 			systemctl stop rsyslog.service >> "$ZLOG" 2>&1 || return 1
 		fi
@@ -173,6 +182,9 @@ removeZlog() {
 		return 1
 	fi
 
+	if dpkg -s 'nginx' &> /dev/null && [[ $(systemctl is-active nginx.service) == "active" ]]; then
+		systemctl stop nginx.service >> "$ZLOG" 2>&1 || return 1
+	fi
 	if [[ $(systemctl is-active rsyslog.service) == "active" ]]; then
 		systemctl stop rsyslog.service >> "$ZLOG" 2>&1 || return 1
 	fi
@@ -180,6 +192,9 @@ removeZlog() {
 	zramctl -r "/dev${ZRAM_DEV}" >> "$ZLOG" 2>&1 || return 1
 
 	systemctl restart rsyslog.service >> "$ZLOG" 2>&1 || return 1
+	if dpkg -s 'nginx' &> /dev/null; then
+		systemctl restart nginx.service >> "$ZLOG" 2>&1 || return 1
+	fi
 
 	journalctl --flush >> "$ZLOG" 2>&1 || return 1
 	echo "/dev$ZRAM_DEV removed" >> "$ZLOG"

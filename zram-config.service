@@ -1,7 +1,7 @@
 [Unit]
 Description=zram-config
 After=local-fs.target
-Before=reboot.target halt.target shutdown.target poweroff.target
+Before=reboot.target halt.target shutdown.target poweroff.target openhab.service
 
 [Service]
 Type=oneshot
