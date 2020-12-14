@@ -5,12 +5,11 @@ set -x
 TMPDIR=/tmp
 
 createZdevice() {
-	# Check Zram Class created
-	if ! [[ -d "/sys/class/zram-control" ]]; then
+	# Check free Zram device exist
+	RAM_DEV=$(zramctl -f | grep -oE "[0-9]+$")
+	if ! [[ -n $RAM_DEV ]]; then
 		modprobe --verbose zram >> "$ZLOG" 2>&1 || return 1
 		RAM_DEV='0'
-	else
-		RAM_DEV="$(cat /sys/class/zram-control/hot_add)"
 	fi
 
 	if [[ -n $MEM_SIZE ]]; then
